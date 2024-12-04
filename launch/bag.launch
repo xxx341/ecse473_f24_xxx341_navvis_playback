@@ -1,0 +1,11 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="bag_file_name" default="$(find navvis_playback)/bags/bags/glennan_5_basic_short.bag" />
+  <arg name="use_bag_gui" default="true" />
+
+  <!-- Play ROS bag file -->
+  <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(arg bag_file_name)" if="$(eval not arg('use_bag_gui'))" />
+
+  <!-- Launch rqt_bag for GUI playback -->
+  <node pkg="rqt_bag" type="rqt_bag" name="rqt_bag" if="$(arg use_bag_gui)" />
+</launch>

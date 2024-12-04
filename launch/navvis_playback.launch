@@ -1,0 +1,38 @@
+<launch>
+  <!-- Argument to control if robot_state_publisher should run -->
+  <arg name="use_robot_state_publisher" default="true" />
+  
+  <arg name="use_xacro" default="true" />
+  <arg name="file" default="$(find navvis_playback)/urdf/navvis_bag_playback.xacro" />
+  <arg name="rviz_config_file" default="$(find navvis_playback)/config/config.rviz" />
+
+
+  <!-- Include the launch file from the previous package -->
+  <include file="$(find navvis_description)/launch/display.launch">
+    <!-- Pass the use_xacro argument to the included launch file -->
+    <arg name="use_xacro" value="$(arg use_xacro)" />
+    <!-- Reference the robot's description file -->
+    <arg name="file" value="$(arg file)" />
+    <!-- Set up RVIZ configuration -->
+    <arg name="rviz_config_file" value="$(arg rviz_config_file)" />
+  </include>
+
+    <!-- Use the file argument as the name of the file used to set the /robot_description parameter on the parameter server -->
+    <param if="$(arg use_xacro)" name="robot_description" command="$(find xacro)/xacro $(arg file)" />
+    <param unless="$(arg use_xacro)" name="robot_description" textfile="$(arg file)" />
+  
+  <!-- Conditional logic to run static_transform_publisher if not using robot_state_publisher -->
+  <group if="$(eval arg('use_robot_state_publisher') == 'false')">
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_tf_base_to_imu" args="0 0 0 0 0 0 base_link imu" />
+  </group>
+
+  <!-- Conditional logic to run robot_state_publisher -->
+  <group if="$(eval arg('use_robot_state_publisher') == 'true')">
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+  </group>
+  
+  <!--
+  <node pkg="rviz" type="rviz" name="rviz_navvis_playback" args="-d $(arg rviz_config_file)" required="true" />
+  -->
+</launch>
+
